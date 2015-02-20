@@ -170,7 +170,7 @@ _symtable symtablemodule.c
 
 #array arraymodule.c	# array objects
 #cmath cmathmodule.c _math.c # -lm # complex math library functions
-#math mathmodule.c _math.c # -lm # math library functions, e.g. sin()
+math mathmodule.c # -lm # math library functions, e.g. sin()
 #_struct _struct.c	# binary structure packing/unpacking
 #_weakref _weakref.c	# basic weak reference support
 #_testcapi _testcapimodule.c    # Python C API test module
@@ -214,7 +214,7 @@ _symtable symtablemodule.c
 #
 # First, look at Setup.config; configure may have set this for you.
 
-#_crypt _cryptmodule.c # -lcrypt	# crypt(3); needs -lcrypt on some systems
+_crypt _cryptmodule.c -lcrypt	# crypt(3); needs -lcrypt on some systems
 
 
 # Some more UNIX dependent modules -- off by default, since these

@@ -23,6 +23,7 @@ Makefile
 Makefile.pre
 Misc/python.pc
 Misc/python-config.sh
+Modules/extras
 Modules/Setup
 Modules/Setup.config
 Modules/Setup.local
