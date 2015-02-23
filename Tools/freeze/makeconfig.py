@@ -6,6 +6,8 @@ import sys
 never = ['marshal', '_imp', '_ast', '__main__', 'builtins',
          'sys', 'gc', '_warnings']
 
+changes = { "signal": "_signal" }
+
 def makeconfig(infp, outfp, modules, with_ifdef=0):
     m1 = re.compile('-- ADDMODULE MARKER 1 --')
     m2 = re.compile('-- ADDMODULE MARKER 2 --')
@@ -16,6 +18,8 @@ def makeconfig(infp, outfp, modules, with_ifdef=0):
             for mod in modules:
                 if mod in never:
                     continue
+                if mod in changes:
+                    mod = changes[mod]
                 if with_ifdef:
                     outfp.write("#ifndef PyInit_%s\n"%mod)
                 outfp.write('extern PyObject* PyInit_%s(void);\n' % mod)
@@ -26,6 +30,8 @@ def makeconfig(infp, outfp, modules, with_ifdef=0):
             for mod in modules:
                 if mod in never:
                     continue
+                if mod in changes:
+                    mod = changes[mod]
                 outfp.write('\t{"%s", PyInit_%s},\n' %
                             (mod, mod))
     if m1:

@@ -57,6 +57,8 @@ Options:
               are read and the -i option replaced with the parsed
               params (note - quoting args in this file is NOT supported)
 
+-S            Compile statically.
+
 -s subsystem: Specify the subsystem (For Windows only.);
               'console' (default), 'windows', 'service' or 'com_dll'
 
@@ -117,6 +119,7 @@ def main():
     path = sys.path[:]
     modargs = 0
     debug = 1
+    static = 0
     odir = ''
     win = sys.platform[:3] == 'win'
     replace_paths = []                  # settable with -r option
@@ -155,7 +158,7 @@ def main():
 
     # Now parse the command line with the extras inserted.
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'r:a:dEe:hmo:p:P:qs:wX:x:l:')
+        opts, args = getopt.getopt(sys.argv[1:], 'r:a:dEe:hmo:p:P:qSs:wX:x:l:')
     except getopt.error as msg:
         usage('getopt error: ' + str(msg))
 
@@ -180,6 +183,8 @@ def main():
             debug = 0
         if o == '-w':
             win = not win
+        if o == '-S':
+            static = 1
         if o == '-s':
             if not win:
                 usage("-s subsystem option only on Windows")
@@ -400,6 +405,8 @@ def main():
             continue
         if not dict[mod].__file__:
             builtins.append(mod)
+        elif mod in modules:
+            builtins.append(mod)
         else:
             unknown.append(mod)
 
@@ -453,9 +460,14 @@ def main():
     with open(config_c_in) as infp, bkfile.open(config_c, 'w') as outfp:
         makeconfig.makeconfig(infp, outfp, builtins)
 
-    cflags = ['$(OPT)']
-    cppflags = defines + includes
-    libs = [os.path.join(binlib, '$(LDLIBRARY)')]
+    if static:
+        cflags=["-static", "-DYNAMIC_ANNOTATIONS_ENABLED=0"]
+        cppflags = defines + includes
+        libs = [os.path.join(binlib, '$(LDLIBRARY)')]
+    else:
+        cflags = ['$(OPT)']
+        cppflags = defines + includes
+        libs = [os.path.join(binlib, '$(LDLIBRARY)')]
 
     somevars = {}
     if os.path.exists(makefile_in):
@@ -465,6 +477,10 @@ def main():
 
     somevars['CFLAGS'] = ' '.join(cflags) # override
     somevars['CPPFLAGS'] = ' '.join(cppflags) # override
+
+    if static:
+        somevars['LDLIBRARY'] = "libpython$(LDVERSION).a" # override
+
     files = [base_config_c, base_frozen_c] + \
             files + supp_sources +  addfiles + libs + \
             ['$(MODLIBS)', '$(LIBS)', '$(SYSLIBS)']
