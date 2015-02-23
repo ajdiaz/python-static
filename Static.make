@@ -35,4 +35,4 @@ python: Modules/Setup Makefile
 	make $(MAKE_ARGS)
 
 clean:
-	rm -f Makefile Modules/Setup python
+	rm -rf Makefile Modules/Setup python Modules/extas
